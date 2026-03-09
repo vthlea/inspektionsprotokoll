@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Inspektionsprotokoll</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+  font-family:'Poppins',sans-serif;
+  background:#f4f6f8;
+  margin:0;
+  padding:25px;
+  color:#111;
+}
+
+/* Startseite */
+#startPage{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:90vh;
+}
+
+.start-wrapper{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:22px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,220px);
+  gap:25px;
+}
+
+.tile{
+  width:220px;
+  height:220px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  font-weight:500;
+  border-radius:12px;
+  background:white;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+  cursor:pointer;
+}
+
+.tile:hover{
+  background:#f9fafb;
+}
+
+.start-service-btn{
+  width:465px;
+  height:44px;
+  border:none;
+  border-radius:8px;
+  background:#111;
+  color:white;
+  font-size:16px;
+  font-family:'Poppins',sans-serif;
+  cursor:pointer;
+}
+
+/* Seiten */
+#stangenPage,
+#ankerPage,
+#servicePage{
+  display:none;
+}
+
+.section{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  margin-bottom:25px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+
+.header-row{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:12px;
+}
+
+input,
+textarea{
+  font-family:'Poppins',sans-serif;
+  padding:12px;
+  font-size:14px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  box-sizing:border-box;
+  width:100%;
+}
+
+textarea{
+  min-height:44px;
+  resize:none;
+  overflow:hidden;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  table-layout:fixed;
+}
+
+th{
+  text-align:left;
+  font-size:14px;
+  padding:0 6px 8px 0;
+}
+
+td{
+  padding:6px 6px 6px 0;
+  vertical-align:top;
+}
+
+.add-btn,.remove-btn,.back-btn{
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  font-family:'Poppins',sans-serif;
+  cursor:pointer;
+}
+
+.add-btn{
+  background:#111;
+  color:white;
+  margin-top:10px;
+  width:100%;
+  padding:12px;
+}
+
+.remove-btn{
+  background:#e5e7eb;
+  height:44px;
+  width:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  font-size:18px;
+  font-weight:600;
+}
+
+.back-btn{
+  margin-bottom:20px;
+  background:#e5e7eb;
+  padding:10px 14px;
+}
+
+/* Dropdown */
+.ersatz-wrapper{
+  position:relative;
+}
+
+.dropdown-toggle{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  cursor:pointer;
+  font-size:14px;
+}
+
+.dropdown-menu{
+  position:absolute;
+  top:48px;
+  left:0;
+  width:100%;
+  background:white;
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  padding:10px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  display:none;
+  z-index:100;
+  max-height:220px;
+  overflow:auto;
+}
+
+.dropdown-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:14px;
+  margin-bottom:8px;
+}
+
+.dropdown-item input{
+  width:18px;
+  height:18px;
+}
+
+/* Status */
+.status-td{
+  vertical-align:middle;
+}
+
+.status-cell{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.status-dot{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:#16a34a;
+  cursor:pointer;
+}
+
+.status-dot.is-orange{
+  background:#f59e0b;
+}
+
+.status-dot.is-red{
+  background:#dc2626;
+}
+
+/* Servicebericht */
+.service-report{
+  max-width:900px;
+  margin:0 auto;
+  background:#efefef;
+  padding:28px 28px 40px 28px;
+  border-radius:8px;
+}
+
+.service-meta{
+  font-size:13px;
+  color:#444;
+  margin-bottom:8px;
+}
+
+.service-title{
+  font-size:20px;
+  font-weight:700;
+  margin:0 0 14px 0;
+}
+
+.service-card{
+  background:#fff;
+  border-radius:10px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.10);
+  padding:14px 18px;
+  margin-bottom:12px;
+}
+
+.service-card-header{
+  display:grid;
+  gap:18px;
+  font-size:14px;
+  font-weight:600;
+  align-items:center;
+}
+
+.service-card-header.two{
+  grid-template-columns:2fr 1fr;
+}
+
+.service-card-header.three{
+  grid-template-columns:2fr 1fr 2fr;
+}
+
+.service-simple-heading{
+  font-size:15px;
+  font-weight:600;
+  margin:18px 0 10px 0;
+}
+
+.service-next-grid{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:18px;
+  align-items:center;
+  font-weight:600;
+  font-size:14px;
+}
+
+.service-top-fields{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.service-small-input{
+  background:white;
+}
+
+.service-work-row{
+  display:grid;
+  grid-template-columns:2fr 1fr 44px;
+  gap:12px;
+  align-items:start;
+  margin-bottom:8px;
+}
+
+.service-work-row.pdf-mode{
+  grid-template-columns:2fr 1fr;
+}
+
+.service-parts-row{
+  display:grid;
+  grid-template-columns:2fr 1fr 2fr;
+  gap:12px;
+  margin-bottom:8px;
+}
+
+.autogrow{
+  min-height:44px;
+  resize:none;
+  overflow:hidden;
+}
+
+.hidden{
+  display:none !important;
+}
+</style>
+</head>
+
+<body>
+
+<div id="startPage">
+  <div class="start-wrapper">
+    <div class="grid">
+      <div class="tile" onclick="openCategory('Stangen')">Stangen</div>
+      <div class="tile" onclick="openCategory('Anker')">Anker</div>
+      <div class="tile"></div>
+      <div class="tile"></div>
+    </div>
+
+    <button class="start-service-btn" onclick="openServicePage()">Servicebericht erstellen</button>
+  </div>
+</div>
+
+<!-- STANGEN -->
+<div id="stangenPage">
+  <button class="back-btn" onclick="goHome()">← Zurück</button>
+
+  <div class="section">
+    <div class="header-row">
+      <input id="stangenKopfKunde" placeholder="Kunde">
+      <input id="stangenKopfStandort" placeholder="Standort">
+      <input id="stangenKopfBestellnummer" placeholder="Bestellnummer">
+      <input id="stangenKopfPST" placeholder="PST">
+      <input id="stangenKopfPruefraum" placeholder="Prüfraum / Gebäude">
+      <input id="stangenKopfJahr" placeholder="Jahr">
+    </div>
+  </div>
+
+  <div id="stangenTables"></div>
+
+  <button class="add-btn" onclick="generatePDF('Stangen')" style="margin-top:30px;">
+    PDF erstellen
+  </button>
+</div>
+
+<!-- ANKER -->
+<div id="ankerPage">
+  <button class="back-btn" onclick="goHome()">← Zurück</button>
+
+  <div class="section">
+    <div class="header-row">
+      <input id="ankerKopfKunde" placeholder="Kunde">
+      <input id="ankerKopfStandort" placeholder="Standort">
+      <input id="ankerKopfBestellnummer" placeholder="Bestellnummer">
+      <input id="ankerKopfPST" placeholder="PST">
+      <input id="ankerKopfPruefraum" placeholder="Prüfraum / Gebäude">
+      <input id="ankerKopfJahr" placeholder="Jahr">
+    </div>
+  </div>
+
+  <div id="ankerTables"></div>
+
+  <button class="add-btn" onclick="generatePDF('Anker')" style="margin-top:30px;">
+    PDF erstellen
+  </button>
+</div>
+
+<!-- SERVICEBERICHT -->
+<div id="servicePage">
+  <button class="back-btn" onclick="goHome()">← Zurück</button>
+
+  <div class="service-report">
+    <div id="serviceTopFields" class="service-top-fields">
+      <input id="serviceReportNumber" class="service-small-input" placeholder="Servicebericht Nummer">
+      <input id="serviceNextDate" class="service-small-input" placeholder="Nächster Service fällig am (MM / JJJJ)">
+    </div>
+
+    <div id="serviceReportCanvas">
+      <div class="service-meta" id="serviceMetaLine"></div>
+
+      <h1 class="service-title">SERVICEBERICHT <span id="serviceReportNumberPreview"></span></h1>
+
+      <textarea id="serviceDescription" class="autogrow" placeholder="Hier kommt die Bezeichnung der ausgeführten Arbeit rein."></textarea>
+
+      <div style="height:16px;"></div>
+
+      <div class="service-card">
+        <div class="service-card-header two">
+          <div>Ausführender Mitarbeiter</div>
+          <div>Arbeitszeit</div>
+        </div>
+      </div>
+
+      <div id="serviceWorkRows"></div>
+
+      <button id="serviceAddRowBtn" class="add-btn" onclick="addServiceWorkRow()" style="margin-bottom:18px;">+ Zeile hinzufügen</button>
+
+      <div id="servicePartsSection">
+        <div class="service-simple-heading">Ersatzteilbedarf</div>
+
+        <div class="service-card">
+          <div class="service-card-header three">
+            <div>Ersatzteil</div>
+            <div>Anzahl</div>
+            <div>Artikelnummer</div>
+          </div>
+        </div>
+
+        <div id="servicePartsRows"></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="add-btn" onclick="generateServicePDF()" style="margin-top:30px; max-width:900px; display:block; margin-left:auto; margin-right:auto;">
+    PDF erstellen
+  </button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+let currentCategory = "";
+
+/* ------------------------------ Konfiguration ------------------------------ */
+
+const STANGEN_ERSATZTEILE_BY_TABLE = {
+  astTable: [
+    { description: "Halteseil", article: "SBHF17-16", value: "16" },
+    { description: "Arretierbolzen", article: "SBHF17-19", value: "19" },
+    { description: "Rohrendkappe", article: "SBHF17-38", value: "38" }
+  ],
+  dstTable: [
+    { description: "Halteseil", article: "SBHF17-16", value: "16" },
+    { description: "Kugelsperrbolzen", article: "SBHF17-20", value: "20" },
+    { description: "Rohrendkappe", article: "SBHF17-38", value: "38" }
+  ],
+  drstTable: [
+    { description: "Halteseil", article: "SBHF17-16", value: "16" },
+    { description: "Kugelsperrbolzen", article: "SBHF17-20", value: "20" },
+    { description: "Rohrendkappe", article: "SBHF17-38", value: "38" },
+    { description: "Augenschraube", article: "SBHF17-40", value: "40" }
+  ],
+  gstTable: [
+    { description: "Halteseil", article: "SBHF17-16", value: "16" },
+    { description: "Kugelsperrbolzen", article: "SBHF17-20", value: "20" }
+  ],
+  qstTable: [
+    { description: "Ersatzteil 1", article: "ART-1", value: "1" },
+    { description: "Ersatzteil 2", article: "ART-2", value: "2" }
+  ],
+  zstTable: [
+    { description: "Ersatzteil 1", article: "ART-1", value: "1" },
+    { description: "Ersatzteil 2", article: "ART-2", value: "2" }
+  ]
+};
+
+const ANKER_ERSATZTEILE_BY_TABLE = {
+  schiebeankerTable: [
+    { description: "Ersatzteil 1", article: "ART-1", value: "1" },
+    { description: "Ersatzteil 2", article: "ART-2", value: "2" }
+  ],
+  steckankerTable: [
+    { description: "Ersatzteil 1", article: "ART-1", value: "1" },
+    { description: "Ersatzteil 2", article: "ART-2", value: "2" }
+  ]
+};
+
+/* ------------------------------ Navigation ------------------------------ */
+
+function openCategory(categoryName){
+  currentCategory = categoryName;
+  hideAllPages();
+  if(categoryName === "Stangen") document.getElementById("stangenPage").style.display = "block";
+  if(categoryName === "Anker") document.getElementById("ankerPage").style.display = "block";
+}
+
+function openServicePage(){
+  hideAllPages();
+  document.getElementById("servicePage").style.display = "block";
+  syncServicePage();
+}
+
+function goHome(){
+  hideAllPages();
+  document.getElementById("startPage").style.display = "flex";
+}
+
+function hideAllPages(){
+  document.getElementById("startPage").style.display = "none";
+  document.getElementById("stangenPage").style.display = "none";
+  document.getElementById("ankerPage").style.display = "none";
+  document.getElementById("servicePage").style.display = "none";
+}
+
+/* ------------------------------ Rendering Stangen ------------------------------ */
+
+function createStangenSection(title, tableId){
+  const parts = STANGEN_ERSATZTEILE_BY_TABLE[tableId] || [];
+  document.getElementById("stangenTables").innerHTML += `
+    <div class="section">
+      <h2>${escapeHtml(title)}</h2>
+      <table id="${escapeHtml(tableId)}">
+        <tr>
+          <th style="width:110px;">Nr.</th>
+          <th style="width:110px;">Länge</th>
+          <th style="width:110px;">Verbogen</th>
+          <th>Ersatzteile</th>
+          <th>Anmerkungen</th>
+          <th style="width:60px;">Status</th>
+          <th style="width:50px;"></th>
+        </tr>
+        ${createStangenRowHTML(parts)}
+      </table>
+      <button class="add-btn" onclick="addStangenRow('${escapeJs(tableId)}')">+ Zeile hinzufügen</button>
+    </div>
+  `;
+}
+
+function createStangenRowHTML(parts){
+  return `
+    <tr>
+      <td><input maxlength="8"></td>
+      <td><input maxlength="8"></td>
+      <td><input class="verbogen-field" maxlength="8"></td>
+      <td>
+        <div class="ersatz-wrapper">
+          <input class="ersatz-field" readonly>
+          <span class="dropdown-toggle">▼</span>
+          <div class="dropdown-menu">
+            ${createDropdownItems(parts)}
+          </div>
+        </div>
+      </td>
+      <td><input></td>
+      <td class="status-td">
+        <div class="status-cell">
+          <span class="status-dot" title="Klicken zum Umschalten"></span>
+        </div>
+      </td>
+      <td><button class="remove-btn" onclick="removeRow(this)">−</button></td>
+    </tr>
+  `;
+}
+
+function addStangenRow(tableId){
+  const parts = STANGEN_ERSATZTEILE_BY_TABLE[tableId] || [];
+  document.getElementById(tableId).insertAdjacentHTML("beforeend", createStangenRowHTML(parts));
+  attachDropdownLogic(document.getElementById("stangenPage"));
+  attachStatusLogic(document.getElementById("stangenPage"), "stangen");
+  attachVerbogenAutoStatusLogic(document.getElementById("stangenPage"));
+}
+
+/* ------------------------------ Rendering Anker ------------------------------ */
+
+function createAnkerSection(title, tableId){
+  const parts = ANKER_ERSATZTEILE_BY_TABLE[tableId] || [];
+  document.getElementById("ankerTables").innerHTML += `
+    <div class="section">
+      <h2>${escapeHtml(title)}</h2>
+      <table id="${escapeHtml(tableId)}">
+        <tr>
+          <th style="width:110px;">Nummer</th>
+          <th style="width:120px;">Ankertyp</th>
+          <th style="width:120px;">Klemmrohr</th>
+          <th style="width:120px;">Shorehärte</th>
+          <th>Ersatzteile</th>
+          <th>Anmerkungen</th>
+          <th style="width:60px;">Status</th>
+          <th style="width:50px;"></th>
+        </tr>
+        ${createAnkerRowHTML(parts)}
+      </table>
+      <button class="add-btn" onclick="addAnkerRow('${escapeJs(tableId)}')">+ Zeile hinzufügen</button>
+    </div>
+  `;
+}
+
+function createAnkerRowHTML(parts){
+  return `
+    <tr>
+      <td><input maxlength="8"></td>
+      <td><input maxlength="20"></td>
+      <td><input maxlength="20"></td>
+      <td><input maxlength="20"></td>
+      <td>
+        <div class="ersatz-wrapper">
+          <input class="ersatz-field" readonly>
+          <span class="dropdown-toggle">▼</span>
+          <div class="dropdown-menu">
+            ${createDropdownItems(parts)}
+          </div>
+        </div>
+      </td>
+      <td><input></td>
+      <td class="status-td">
+        <div class="status-cell">
+          <span class="status-dot" title="Klicken zum Umschalten"></span>
+        </div>
+      </td>
+      <td><button class="remove-btn" onclick="removeRow(this)">−</button></td>
+    </tr>
+  `;
+}
+
+function addAnkerRow(tableId){
+  const parts = ANKER_ERSATZTEILE_BY_TABLE[tableId] || [];
+  document.getElementById(tableId).insertAdjacentHTML("beforeend", createAnkerRowHTML(parts));
+  attachDropdownLogic(document.getElementById("ankerPage"));
+  attachStatusLogic(document.getElementById("ankerPage"), "anker");
+}
+
+/* ------------------------------ Dropdown Items ------------------------------ */
+
+function createDropdownItems(parts){
+  if(!parts.length){
+    return `<div style="font-size:13px;color:#6b7280;">Keine Ersatzteile hinterlegt</div>`;
+  }
+
+  return parts.map(p => `
+    <label class="dropdown-item">
+      <input
+        type="checkbox"
+        data-out="${escapeHtml(p.value)}"
+        data-description="${escapeHtml(p.description)}"
+        data-article="${escapeHtml(p.article)}"
+      >
+      <span>${escapeHtml(p.description)} ${escapeHtml(p.article)}</span>
+    </label>
+  `).join("");
+}
+
+function removeRow(btn){
+  btn.closest("tr").remove();
+}
+
+/* ------------------------------ Dropdown Logic ------------------------------ */
+
+function attachDropdownLogic(scopeElement){
+  if(!scopeElement) return;
+
+  scopeElement.querySelectorAll(".dropdown-toggle").forEach(toggle=>{
+    if(toggle.dataset.bound === "1") return;
+    toggle.dataset.bound = "1";
+
+    toggle.onclick = function(e){
+      e.stopPropagation();
+      const menu = this.nextElementSibling;
+      const isOpen = menu.style.display === "block";
+
+      if(!isOpen){
+        closeAllDropdowns();
+        menu.style.display = "block";
+      }else{
+        menu.style.display = "none";
+      }
+    };
+  });
+
+  scopeElement.querySelectorAll(".dropdown-menu").forEach(menu=>{
+    if(menu.dataset.bound === "1") return;
+    menu.dataset.bound = "1";
+    menu.addEventListener("click", function(e){
+      e.stopPropagation();
+    });
+  });
+
+  scopeElement.querySelectorAll(".dropdown-menu input[type='checkbox']").forEach(cb=>{
+    if(cb.dataset.bound === "1") return;
+    cb.dataset.bound = "1";
+
+    cb.onchange = function(){
+      const wrapper = this.closest(".ersatz-wrapper");
+      const field = wrapper.querySelector(".ersatz-field");
+      const boxes = wrapper.querySelectorAll("input[type='checkbox']");
+
+      let values = [];
+      boxes.forEach(c=>{
+        if(c.checked) values.push(c.dataset.out);
+      });
+
+      field.value = values.join(", ");
+    };
+  });
+}
+
+document.addEventListener("click", closeAllDropdowns);
+
+function closeAllDropdowns(){
+  document.querySelectorAll(".dropdown-menu").forEach(menu=>{
+    menu.style.display = "none";
+  });
+}
+
+/* ------------------------------ Status Logic ------------------------------ */
+
+function attachStatusLogic(scopeElement, mode){
+  if(!scopeElement) return;
+
+  scopeElement.querySelectorAll(".status-dot").forEach(dot=>{
+    if(dot.dataset.bound === "1") return;
+    dot.dataset.bound = "1";
+
+    dot.onclick = function(e){
+      e.stopPropagation();
+
+      if(mode === "anker"){
+        if(!this.classList.contains("is-orange") && !this.classList.contains("is-red")){
+          this.classList.add("is-orange");
+          this.classList.remove("is-red");
+        }else if(this.classList.contains("is-orange")){
+          this.classList.remove("is-orange");
+          this.classList.add("is-red");
+        }else{
+          this.classList.remove("is-orange");
+          this.classList.remove("is-red");
+        }
+      }else{
+        this.classList.toggle("is-red");
+      }
+    };
+  });
+}
+
+/* ------------------------------ Auto-Status Stangen ------------------------------ */
+
+function attachVerbogenAutoStatusLogic(scopeElement){
+  if(!scopeElement) return;
+
+  scopeElement.querySelectorAll(".verbogen-field").forEach(field=>{
+    if(field.dataset.bound === "1") return;
+    field.dataset.bound = "1";
+
+    field.addEventListener("input", function(){
+      const tr = this.closest("tr");
+      const dot = tr.querySelector(".status-dot");
+      if(!dot) return;
+
+      const raw = this.value.trim().replace(",", ".");
+      if(raw === ""){
+        dot.classList.remove("is-red");
+        dot.classList.remove("is-orange");
+        return;
+      }
+
+      const val = Number(raw);
+      if(Number.isNaN(val)){
+        dot.classList.remove("is-red");
+        dot.classList.remove("is-orange");
+        return;
+      }
+
+      if(val <= -11){
+        dot.classList.remove("is-orange");
+        dot.classList.add("is-red");
+      }else{
+        dot.classList.remove("is-orange");
+        dot.classList.remove("is-red");
+      }
+    });
+  });
+}
+
+/* ------------------------------ Servicebericht ------------------------------ */
+
+function addServiceWorkRow(name = "", time = ""){
+  document.getElementById("serviceWorkRows").insertAdjacentHTML("beforeend", `
+    <div class="service-work-row">
+      <textarea class="service-worker-name autogrow" placeholder="Ausführender Mitarbeiter">${escapeHtml(name)}</textarea>
+      <textarea class="service-worker-time autogrow" placeholder="Arbeitszeit">${escapeHtml(time)}</textarea>
+      <button class="remove-btn service-remove-btn" onclick="this.parentElement.remove()">−</button>
+    </div>
+  `);
+
+  bindAutoGrow(document.getElementById("serviceWorkRows").lastElementChild);
+}
+
+function renderServicePartsRows(parts){
+  const container = document.getElementById("servicePartsRows");
+  const section = document.getElementById("servicePartsSection");
+  container.innerHTML = "";
+
+  if(parts.length === 0){
+    section.classList.add("hidden");
+    return;
+  }
+
+  section.classList.remove("hidden");
+
+  parts.forEach(part=>{
+    container.insertAdjacentHTML("beforeend", `
+      <div class="service-parts-row">
+        <input value="${escapeHtml(part.description)}" readonly>
+        <input value="${escapeHtml(String(part.count))}" readonly>
+        <input value="${escapeHtml(part.article)}" readonly>
+      </div>
+    `);
+  });
+}
+
+function syncServicePage(){
+  const header = getPreferredHeaderData();
+  const parts = collectSelectedParts();
+
+document.getElementById("serviceMetaLine").textContent = [
+  [header.kunde, header.standort].filter(Boolean).join(", "),
+  header.bestellnummer,
+  header.pst,
+  header.pruefraum,
+  header.jahr
+].filter(Boolean).join(" - ");
+
+  renderServicePartsRows(parts);
+
+  const numberValue = document.getElementById("serviceReportNumber").value.trim();
+  document.getElementById("serviceReportNumberPreview").textContent = numberValue || "";
+
+  if(document.getElementById("serviceWorkRows").children.length === 0){
+    addServiceWorkRow();
+  }
+}
+
+function getPreferredHeaderData(){
+  const stangen = getHeaderData("Stangen");
+  const anker = getHeaderData("Anker");
+
+  const stangenScore = countFilledHeader(stangen);
+  const ankerScore = countFilledHeader(anker);
+
+  if(currentCategory === "Anker" && ankerScore > 0) return anker;
+  if(currentCategory === "Stangen" && stangenScore > 0) return stangen;
+
+  return ankerScore > stangenScore ? anker : stangen;
+}
+
+function getHeaderData(category){
+  if(category === "Anker"){
+    return {
+      kunde: document.getElementById("ankerKopfKunde").value.trim(),
+      standort: document.getElementById("ankerKopfStandort").value.trim(),
+      bestellnummer: document.getElementById("ankerKopfBestellnummer").value.trim(),
+      pst: document.getElementById("ankerKopfPST").value.trim(),
+      pruefraum: document.getElementById("ankerKopfPruefraum").value.trim(),
+      jahr: document.getElementById("ankerKopfJahr").value.trim()
+    };
+  }
+
+  return {
+    kunde: document.getElementById("stangenKopfKunde").value.trim(),
+    standort: document.getElementById("stangenKopfStandort").value.trim(),
+    bestellnummer: document.getElementById("stangenKopfBestellnummer").value.trim(),
+    pst: document.getElementById("stangenKopfPST").value.trim(),
+    pruefraum: document.getElementById("stangenKopfPruefraum").value.trim(),
+    jahr: document.getElementById("stangenKopfJahr").value.trim()
+  };
+}
+
+function countFilledHeader(obj){
+  return Object.values(obj).filter(v => String(v).trim() !== "").length;
+}
+
+function collectSelectedParts(){
+  const counts = new Map();
+
+  document.querySelectorAll("#stangenPage .dropdown-menu input[type='checkbox']:checked, #ankerPage .dropdown-menu input[type='checkbox']:checked")
+    .forEach(cb=>{
+      const description = cb.dataset.description || "";
+      const article = cb.dataset.article || "";
+      const key = description + "||" + article;
+
+      if(!counts.has(key)){
+        counts.set(key, {
+          description,
+          article,
+          count: 1
+        });
+      }else{
+        counts.get(key).count += 1;
+      }
+    });
+
+  return Array.from(counts.values());
+}
+
+/* ------------------------------ Dateinamen ------------------------------ */
+
+function getPdfFilename(category){
+  const header = getHeaderData(category);
+  const kundeStandort = [header.kunde, header.standort].filter(Boolean).join(" ");
+
+  const parts = [
+    header.bestellnummer,
+    header.pst,
+    kundeStandort,
+    header.pruefraum,
+    header.jahr
+  ].filter(Boolean);
+
+  const base = `Inspektionsprotokoll ${category}`;
+  const full = parts.length ? `${base} - ${parts.join(" - ")}` : base;
+
+  return sanitizeFilename(full) + ".pdf";
+}
+
+function getServicePdfFilename(){
+  const header = getPreferredHeaderData();
+  const number = document.getElementById("serviceReportNumber").value.trim();
+  const kundeStandort = [header.kunde, header.standort].filter(Boolean).join(" ");
+
+  const parts = [
+    number,
+    header.bestellnummer,
+    header.pst,
+    kundeStandort,
+    header.pruefraum,
+    header.jahr
+  ].filter(Boolean);
+
+  const base = "Servicebericht";
+  const full = parts.length ? `${base} - ${parts.join(" - ")}` : base;
+
+  return sanitizeFilename(full) + ".pdf";
+}
+
+function sanitizeFilename(name){
+  return name
+    .replace(/[\u0000-\u001f]/g, "")
+    .replace(/[\\\/:\*\?"<>\|]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/* ------------------------------ PDF Protokolle ------------------------------ */
+
+async function generatePDF(category){
+  const { jsPDF } = window.jspdf;
+
+  const pageId = category === "Anker" ? "ankerPage" : "stangenPage";
+  const original = document.getElementById(pageId);
+  const clone = original.cloneNode(true);
+
+  clone.querySelectorAll(".back-btn,.add-btn,.remove-btn,.dropdown-toggle").forEach(el=>el.remove());
+
+  clone.querySelectorAll("table").forEach(table=>{
+    table.querySelectorAll("tr").forEach((tr,i)=>{
+      if(i === 0) return;
+
+      const inputs = tr.querySelectorAll("input");
+      let filled = false;
+
+      inputs.forEach(input=>{
+        if(input.value.trim() !== "") filled = true;
+      });
+
+      if(!filled) tr.remove();
+    });
+  });
+
+  clone.querySelectorAll(".section").forEach(section=>{
+    const table = section.querySelector("table");
+    if(!table) return;
+    const rows = table.querySelectorAll("tr");
+    if(rows.length <= 1){
+      section.remove();
+    }
+  });
+
+  clone.style.position = "absolute";
+  clone.style.left = "-9999px";
+  clone.style.top = "0";
+  clone.style.width = "1400px";
+  document.body.appendChild(clone);
+
+  const pdf = new jsPDF("l","mm","a4");
+  const pageWidth = 297;
+  const pageHeight = 210;
+  const marginTop = 8;
+  const marginBottom = 12;
+  const usableHeight = pageHeight - marginTop - marginBottom;
+
+  let y = marginTop;
+  const sections = clone.querySelectorAll(".section");
+
+  for(const section of sections){
+    const canvas = await html2canvas(section, { scale:2, useCORS:true });
+    const imgWidth = pageWidth;
+    const imgHeight = canvas.height * imgWidth / canvas.width;
+
+    if(imgHeight <= usableHeight){
+      if(y + imgHeight > (pageHeight - marginBottom)){
+        pdf.addPage();
+        y = marginTop;
+      }
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      pdf.addImage(imgData, "JPEG", 0, y, imgWidth, imgHeight);
+      y += imgHeight + 6;
+      continue;
+    }
+
+    let remainingPx = canvas.height;
+    let sourceY = 0;
+    const pxPerMm = canvas.width / imgWidth;
+    const sliceHeightPx = Math.floor(usableHeight * pxPerMm);
+
+    if(y !== marginTop){
+      pdf.addPage();
+      y = marginTop;
+    }
+
+    while(remainingPx > 0){
+      const currentSlicePx = Math.min(sliceHeightPx, remainingPx);
+      const sliceCanvas = document.createElement("canvas");
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = currentSlicePx;
+
+      const ctx = sliceCanvas.getContext("2d");
+      ctx.drawImage(
+        canvas,
+        0, sourceY, canvas.width, currentSlicePx,
+        0, 0, canvas.width, currentSlicePx
+      );
+
+      const sliceHeightMm = currentSlicePx / pxPerMm;
+      pdf.addImage(sliceCanvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, y, imgWidth, sliceHeightMm);
+
+      remainingPx -= currentSlicePx;
+      sourceY += currentSlicePx;
+
+      if(remainingPx > 0){
+        pdf.addPage();
+        y = marginTop;
+      }else{
+        y += sliceHeightMm + 6;
+      }
+    }
+  }
+
+  document.body.removeChild(clone);
+
+  const pageCount = pdf.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    pdf.setPage(i);
+    pdf.setFontSize(10);
+    pdf.text("Seite " + i + " von " + pageCount, pageWidth - 40, pageHeight - 10);
+  }
+
+  pdf.save(getPdfFilename(category));
+}
+
+/* ------------------------------ Service PDF Aufbau ------------------------------ */
+
+function buildServicePdfPageDom({
+  metaText,
+  reportNumber,
+  description,
+  workRows,
+  parts,
+  nextDate,
+  pageWorkRows,
+  includePartsHeader,
+  pagePartsRows,
+  includeBottomCard
+}){
+  const page = document.createElement("div");
+  page.style.width = "794px";
+  page.style.height = "1123px";
+  page.style.background = "#efefef";
+  page.style.padding = "28px";
+  page.style.boxSizing = "border-box";
+  page.style.display = "flex";
+  page.style.flexDirection = "column";
+  page.style.fontFamily = "'Poppins', sans-serif";
+  page.style.color = "#111";
+
+  const top = document.createElement("div");
+  top.style.flex = "1";
+
+const meta = document.createElement("div");
+meta.style.fontSize = "12px";
+meta.style.color = "#555";
+meta.style.marginBottom = "10px";
+meta.style.whiteSpace = "pre-wrap";
+meta.textContent = metaText || "";
+top.appendChild(meta);
+
+  const title = document.createElement("h1");
+  title.style.fontSize = "24px";
+  title.style.fontWeight = "700";
+  title.style.margin = "0 0 14px 0";
+  title.textContent = "SERVICEBERICHT NR. " + (reportNumber ? " " + reportNumber : "");
+  top.appendChild(title);
+
+if(description){
+  const desc = document.createElement("div");
+  desc.style.fontSize = "16px";
+  desc.style.fontWeight = "600";
+  desc.style.lineHeight = "1.45";
+  desc.style.whiteSpace = "pre-wrap";
+  desc.style.marginBottom = "20px";
+  desc.textContent = description;
+  top.appendChild(desc);
+}
+
+  const workerCard = document.createElement("div");
+  workerCard.style.background = "#fff";
+  workerCard.style.borderRadius = "10px";
+  workerCard.style.boxShadow = "0 6px 18px rgba(0,0,0,0.10)";
+  workerCard.style.padding = "14px 18px";
+  workerCard.style.marginBottom = "20px";
+  workerCard.innerHTML = `
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:18px;font-size:14px;font-weight:600;align-items:center;">
+      <div>Ausführender Mitarbeiter</div>
+      <div>Arbeitszeit</div>
+    </div>
+  `;
+  top.appendChild(workerCard);
+
+  pageWorkRows.forEach(row=>{
+    const rowEl = document.createElement("div");
+    rowEl.style.display = "grid";
+    rowEl.style.gridTemplateColumns = "2fr 1fr";
+    rowEl.style.gap = "12px";
+    rowEl.style.marginBottom = "8px";
+
+    const left = document.createElement("div");
+    left.style.background = "white";
+    left.style.border = "1px solid #d1d5db";
+    left.style.borderRadius = "10px";
+    left.style.padding = "12px";
+    left.style.whiteSpace = "pre-wrap";
+    left.style.fontSize = "16px";
+    left.textContent = row.name || "";
+
+    const right = document.createElement("div");
+    right.style.background = "white";
+    right.style.border = "1px solid #d1d5db";
+    right.style.borderRadius = "10px";
+    right.style.padding = "12px";
+    right.style.whiteSpace = "pre-wrap";
+    right.style.fontSize = "16px";
+    right.textContent = row.time || "";
+
+    rowEl.appendChild(left);
+    rowEl.appendChild(right);
+    top.appendChild(rowEl);
+  });
+
+  if(includePartsHeader && parts.length > 0){
+    const heading = document.createElement("div");
+    heading.style.fontSize = "16px";
+    heading.style.fontWeight = "600";
+    heading.style.margin = "32px 0 10px 0";
+    heading.textContent = "Ersatzteilbedarf";
+    top.appendChild(heading);
+
+    const partCard = document.createElement("div");
+    partCard.style.background = "#fff";
+    partCard.style.borderRadius = "10px";
+    partCard.style.boxShadow = "0 6px 18px rgba(0,0,0,0.10)";
+    partCard.style.padding = "14px 18px";
+    partCard.style.marginBottom = "12px";
+    partCard.innerHTML = `
+      <div style="display:grid;grid-template-columns:2fr 1fr 2fr;gap:18px;font-size:14px;font-weight:600;align-items:center;">
+        <div>Ersatzteil</div>
+        <div>Anzahl</div>
+        <div>Artikelnummer</div>
+      </div>
+    `;
+    top.appendChild(partCard);
+  }
+
+  pagePartsRows.forEach(part=>{
+    const rowEl = document.createElement("div");
+    rowEl.style.display = "grid";
+    rowEl.style.gridTemplateColumns = "2fr 1fr 2fr";
+    rowEl.style.gap = "12px";
+    rowEl.style.marginBottom = "8px";
+
+    [part.description, String(part.count), part.article].forEach(value=>{
+      const cell = document.createElement("div");
+      cell.style.background = "white";
+      cell.style.border = "1px solid #d1d5db";
+      cell.style.borderRadius = "10px";
+      cell.style.padding = "12px";
+      cell.style.fontSize = "16px";
+      cell.style.whiteSpace = "pre-wrap";
+      cell.textContent = value || "";
+      rowEl.appendChild(cell);
+    });
+
+    top.appendChild(rowEl);
+  });
+
+  page.appendChild(top);
+
+  const bottom = document.createElement("div");
+  bottom.style.paddingTop = "32px";
+
+  if(includeBottomCard){
+    const nextCard = document.createElement("div");
+    nextCard.style.background = "#fff";
+    nextCard.style.borderRadius = "10px";
+    nextCard.style.boxShadow = "0 6px 18px rgba(0,0,0,0.10)";
+    nextCard.style.padding = "14px 18px";
+    nextCard.style.marginBottom = "56px";
+    nextCard.innerHTML = `
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:18px;align-items:center;font-weight:600;font-size:14px;">
+        <div>Nächster Service fällig am</div>
+        <div>${escapeHtml(nextDate || "MM/JJJJ")}</div>
+      </div>
+    `;
+    bottom.appendChild(nextCard);
+  }
+
+  const signatures = document.createElement("div");
+  signatures.style.display = "grid";
+  signatures.style.gridTemplateColumns = "1fr 1fr";
+  signatures.style.gap = "32px";
+  signatures.innerHTML = `
+    <div style="border-top:1px solid #888;padding-top:8px;font-size:14px;color:#333;">Unterschrift Auftraggeber</div>
+    <div style="border-top:1px solid #888;padding-top:8px;font-size:14px;color:#333;">Unterschrift S. Bleyer GmbH</div>
+  `;
+  bottom.appendChild(signatures);
+
+  page.appendChild(bottom);
+
+  return page;
+}
+
+function measureNodeHeight(node){
+  const wrap = document.createElement("div");
+  wrap.style.position = "absolute";
+  wrap.style.left = "-99999px";
+  wrap.style.top = "0";
+  wrap.style.width = "794px";
+  wrap.appendChild(node);
+  document.body.appendChild(wrap);
+  const h = node.offsetHeight;
+  document.body.removeChild(wrap);
+  return h;
+}
+
+async function generateServicePDF(){
+  syncServicePage();
+
+  const { jsPDF } = window.jspdf;
+
+  const header = getPreferredHeaderData();
+  const metaText =
+    [header.kunde, header.standort].filter(Boolean).join(", ") +
+    (
+      [header.bestellnummer, header.pst, header.pruefraum, header.jahr].filter(Boolean).length
+        ? " - " + [header.bestellnummer, header.pst, header.pruefraum, header.jahr].filter(Boolean).join(" - ")
+        : ""
+    );
+
+  const reportNumber = document.getElementById("serviceReportNumber").value.trim();
+  const description = document.getElementById("serviceDescription").value.trim();
+  const nextDate = document.getElementById("serviceNextDate").value.trim() || "MM/JJJJ";
+
+  const workRows = Array.from(document.querySelectorAll("#serviceWorkRows .service-work-row")).map(row=>({
+    name: row.querySelector(".service-worker-name")?.value?.trim() || "",
+    time: row.querySelector(".service-worker-time")?.value?.trim() || ""
+  })).filter(row => row.name || row.time);
+
+  const parts = collectSelectedParts();
+
+  const pdf = new jsPDF("p", "mm", "a4");
+  const pageWidthMm = 210;
+  const pageHeightMm = 297;
+  const imgWidthMm = 210;
+
+  const pagesData = [];
+  let workIndex = 0;
+  let partIndex = 0;
+  let firstPage = true;
+
+  while(firstPage || workIndex < workRows.length || partIndex < parts.length || (firstPage && workRows.length === 0 && partIndex === 0)){
+    let pageWorkRows = [];
+    let pagePartsRows = [];
+    const includePartsHeader = partIndex < parts.length;
+    const includeBottomCard = true;
+
+    // Grundseite bauen und Höhe testen
+    let page = buildServicePdfPageDom({
+      metaText,
+      reportNumber,
+      description: firstPage ? description : "",
+      workRows,
+      parts,
+      nextDate,
+      pageWorkRows,
+      includePartsHeader: false,
+      pagePartsRows,
+      includeBottomCard
+    });
+
+    let baseHeight = measureNodeHeight(page);
+
+    // Worker-Zeilen sukzessive hinzufügen
+    while(workIndex < workRows.length){
+      const candidateRows = [...pageWorkRows, workRows[workIndex]];
+      const candidatePage = buildServicePdfPageDom({
+        metaText,
+        reportNumber,
+        description: firstPage ? description : "",
+        workRows,
+        parts,
+        nextDate,
+        pageWorkRows: candidateRows,
+        includePartsHeader: false,
+        pagePartsRows,
+        includeBottomCard
+      });
+
+      if(measureNodeHeight(candidatePage) <= 1123){
+        pageWorkRows = candidateRows;
+        workIndex++;
+      }else{
+        break;
+      }
+    }
+
+    // Ersatzteile hinzufügen
+    while(partIndex < parts.length){
+      const candidateRows = [...pagePartsRows, parts[partIndex]];
+      const candidatePage = buildServicePdfPageDom({
+        metaText,
+        reportNumber,
+        description: firstPage ? description : "",
+        workRows,
+        parts,
+        nextDate,
+        pageWorkRows,
+        includePartsHeader: includePartsHeader,
+        pagePartsRows: candidateRows,
+        includeBottomCard
+      });
+
+      if(measureNodeHeight(candidatePage) <= 1123){
+        pagePartsRows = candidateRows;
+        partIndex++;
+      }else{
+        break;
+      }
+    }
+
+    page = buildServicePdfPageDom({
+      metaText,
+      reportNumber,
+      description: firstPage ? description : "",
+      workRows,
+      parts,
+      nextDate,
+      pageWorkRows,
+      includePartsHeader: includePartsHeader && pagePartsRows.length > 0,
+      pagePartsRows,
+      includeBottomCard
+    });
+
+    pagesData.push(page);
+    firstPage = false;
+
+    if(workRows.length === 0 && parts.length === 0){
+      break;
+    }
+  }
+
+  for(let i=0;i<pagesData.length;i++){
+    if(i>0) pdf.addPage();
+
+    const pageDom = pagesData[i];
+    pageDom.style.position = "absolute";
+    pageDom.style.left = "-99999px";
+    pageDom.style.top = "0";
+    document.body.appendChild(pageDom);
+
+    const canvas = await html2canvas(pageDom, { scale:2, useCORS:true });
+    document.body.removeChild(pageDom);
+
+    const imgHeightMm = canvas.height * imgWidthMm / canvas.width;
+    pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, imgWidthMm, imgHeightMm);
+  }
+
+  pdf.save(getServicePdfFilename());
+}
+
+/* ------------------------------ Auto Grow ------------------------------ */
+
+function autoGrow(el){
+  if(!el) return;
+  el.style.height = "44px";
+  el.style.height = el.scrollHeight + "px";
+}
+
+function bindAutoGrow(scope=document){
+  scope.querySelectorAll(".autogrow").forEach(el=>{
+    if(el.dataset.bound === "1") return;
+    el.dataset.bound = "1";
+    autoGrow(el);
+    el.addEventListener("input", function(){
+      autoGrow(this);
+    });
+  });
+}
+
+/* ------------------------------ Live Sync ------------------------------ */
+
+document.addEventListener("input", function(e){
+  if(e.target.id === "serviceReportNumber"){
+    document.getElementById("serviceReportNumberPreview").textContent = e.target.value.trim();
+  }
+});
+
+/* ------------------------------ Utils ------------------------------ */
+
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function escapeJs(str){
+  return String(str).replaceAll("\\", "\\\\").replaceAll("'", "\\'");
+}
+
+/* ------------------------------ Initialisierung ------------------------------ */
+
+createStangenSection("AST - Stangen","astTable");
+createStangenSection("DST - Stangen","dstTable");
+createStangenSection("DRST - Stangen","drstTable");
+createStangenSection("GST - Stangen","gstTable");
+createStangenSection("QST - Stangen","qstTable");
+createStangenSection("ZST - Stangen","zstTable");
+
+createAnkerSection("Schiebeanker","schiebeankerTable");
+createAnkerSection("Steckanker","steckankerTable");
+
+attachDropdownLogic(document.getElementById("stangenPage"));
+attachDropdownLogic(document.getElementById("ankerPage"));
+
+attachStatusLogic(document.getElementById("stangenPage"), "stangen");
+attachStatusLogic(document.getElementById("ankerPage"), "anker");
+
+attachVerbogenAutoStatusLogic(document.getElementById("stangenPage"));
+
+addServiceWorkRow();
+syncServicePage();
+bindAutoGrow();
+</script>
+
+</body>
+</html>

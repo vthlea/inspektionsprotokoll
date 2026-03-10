@@ -1,0 +1,25 @@
+{
+  "name": "Inspektionsprotokoll",
+  "short_name": "Inspektion",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "icon_platzhalter.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_platzhalter.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_platzhalter.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

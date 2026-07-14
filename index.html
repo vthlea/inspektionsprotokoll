@@ -399,9 +399,15 @@ h2{
 
 .service-parts-row{
   display:grid;
-  grid-template-columns:2fr 1fr 2fr;
+  grid-template-columns:2fr 1fr 2fr 44px;
   gap:12px;
+  align-items:start;
   margin-bottom:8px;
+}
+
+.service-parts-row .service-part-auto-spacer{
+  width:44px;
+  height:44px;
 }
 
 .service-simple-heading{
@@ -410,8 +416,75 @@ h2{
   margin:32px 0 10px 0;
 }
 
-#serviceDescription{
+/* Auswahlfeld für die Servicebeschreibung */
+.service-description-wrapper{
+  position:relative;
+  width:100%;
   margin-bottom:28px;
+}
+
+#serviceDescription{
+  margin-bottom:0;
+  padding-right:42px;
+}
+
+.service-description-toggle{
+  position:absolute;
+  right:14px;
+  top:14px;
+  z-index:2;
+  color:#4b5563;
+  font-size:14px;
+  line-height:18px;
+  cursor:pointer;
+  user-select:none;
+}
+
+.service-description-menu{
+  position:absolute;
+  top:calc(100% + 6px);
+  left:0;
+  right:0;
+  z-index:1000;
+  display:none;
+  padding:8px;
+  background:#ffffff;
+  border:1px solid #d1d5db;
+  border-radius:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.12);
+}
+
+.service-description-menu.is-open{
+  display:block;
+}
+
+.service-description-option{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:14px;
+  min-height:42px;
+  padding:7px 9px;
+  border-radius:7px;
+  box-sizing:border-box;
+  cursor:pointer;
+  user-select:none;
+}
+
+.service-description-option:hover{
+  background:#f4f6f8;
+}
+
+.service-description-option input{
+  width:20px;
+  height:20px;
+  margin:0;
+  flex:0 0 auto;
+}
+
+.service-description-option-fixed{
+  color:#6b7280;
+  cursor:default;
 }
 
 .hidden{
@@ -509,7 +582,27 @@ h2{
 
       <h1 class="service-title">SERVICEBERICHT <span id="serviceReportNumberPreview"></span></h1>
 
-      <textarea id="serviceDescription" class="autogrow" placeholder="Beschreibung"></textarea>
+      <div class="service-description-wrapper" id="serviceDescriptionWrapper">
+        <textarea id="serviceDescription" class="autogrow" placeholder="Beschreibung">Inspektion der kompletten S. Bleyer Fahrzeugfixierung inkl. Wartung, Reinigung und Dokumentation.</textarea>
+        <span class="service-description-toggle" id="serviceDescriptionToggle" aria-hidden="true">▼</span>
+
+        <div class="service-description-menu" id="serviceDescriptionMenu">
+          <label class="service-description-option service-description-option-fixed">
+            <input type="checkbox" id="serviceOptionVehicle" checked disabled>
+            <span>Fahrzeugfixierung</span>
+          </label>
+
+          <label class="service-description-option">
+            <input type="checkbox" id="serviceOptionMonitors">
+            <span>Monitoranlagen</span>
+          </label>
+
+          <label class="service-description-option">
+            <input type="checkbox" id="serviceOptionFloorSockets">
+            <span>Reinigung der Bodenbuchsen</span>
+          </label>
+        </div>
+      </div>
 
       <div class="service-card">
         <div class="service-card-header two" style="display:grid;grid-template-columns:2fr 1fr 44px;gap:12px;font-size:14px;font-weight:600;align-items:center;margin-bottom:12px;">
@@ -524,14 +617,20 @@ h2{
 
       <div id="servicePartsSection">
         <div class="service-card">
-          <div class="service-card-header three" style="display:grid;grid-template-columns:2fr 1fr 2fr;gap:18px;font-size:14px;font-weight:600;align-items:center;margin-bottom:12px;">
+          <div class="service-card-header three" style="display:grid;grid-template-columns:2fr 1fr 2fr 44px;gap:12px;font-size:14px;font-weight:600;align-items:center;margin-bottom:12px;">
             <div>Ersatzteil</div>
             <div>Anzahl</div>
             <div>Artikelnummer</div>
+            <div></div>
           </div>
         </div>
 
-        <div id="servicePartsRows"></div>
+        <div id="servicePartsRows">
+          <div id="serviceAutoPartsRows"></div>
+          <div id="serviceManualPartsRows"></div>
+        </div>
+
+        <button id="serviceAddPartRowBtn" class="add-btn" onclick="addServicePartRow()" style="margin-bottom:18px;">+ Zeile hinzufügen</button>
       </div>
     </div>
   </div>
@@ -902,9 +1001,12 @@ function openCategory(categoryName){
 function openServicePage(){
   currentCategory = "Servicebericht";
   currentRecordType = "Servicebericht";
+  ensureDefaultServiceDescription();
+  syncServiceDescriptionOptionsFromText();
   syncServicePage();
   hideAllPages();
   document.getElementById("servicePage").style.display = "block";
+  autoGrow(document.getElementById("serviceDescription"));
 }
 
 /* ------------------------------ Rendering Tabellen ------------------------------ */
@@ -1103,6 +1205,7 @@ function closeAllDropdowns(){
   document.querySelectorAll(".dropdown-menu").forEach(menu=>{
     menu.style.display = "none";
   });
+  closeServiceDescriptionMenu();
 }
 
 /* ------------------------------ Status Logic ------------------------------ */
@@ -1174,6 +1277,132 @@ function attachVerbogenAutoStatusLogic(scopeElement){
 
 /* ------------------------------ Servicebericht ------------------------------ */
 
+const SERVICE_DESCRIPTION_DEFAULT =
+  "Inspektion der kompletten S. Bleyer Fahrzeugfixierung inkl. Wartung, Reinigung und Dokumentation.";
+
+function ensureDefaultServiceDescription(){
+  const description = document.getElementById("serviceDescription");
+  if(!description) return;
+
+  if(!description.value.trim()){
+    description.value = SERVICE_DESCRIPTION_DEFAULT;
+    autoGrow(description);
+  }
+}
+
+function updateServiceDescriptionFromOptions(){
+  const description = document.getElementById("serviceDescription");
+  const monitors = document.getElementById("serviceOptionMonitors");
+  const floorSockets = document.getElementById("serviceOptionFloorSockets");
+
+  if(!description || !monitors || !floorSockets) return;
+
+  let text = "Inspektion der kompletten S. Bleyer Fahrzeugfixierung";
+
+  if(monitors.checked){
+    text += " und der Monitoranlagen";
+  }
+
+  text += " inkl. Wartung, Reinigung und Dokumentation";
+
+  if(floorSockets.checked){
+    text += ", sowie Reinigung der Bodenbuchsen";
+  }
+
+  description.value = text + ".";
+  autoGrow(description);
+  description.dispatchEvent(new Event("input", { bubbles:true }));
+}
+
+function syncServiceDescriptionOptionsFromText(){
+  const description = document.getElementById("serviceDescription");
+  const vehicle = document.getElementById("serviceOptionVehicle");
+  const monitors = document.getElementById("serviceOptionMonitors");
+  const floorSockets = document.getElementById("serviceOptionFloorSockets");
+
+  if(!description || !vehicle || !monitors || !floorSockets) return;
+
+  const text = description.value || "";
+
+  vehicle.checked = true;
+  monitors.checked = /Monitoranlagen/i.test(text);
+  floorSockets.checked = /Bodenbuchsen/i.test(text);
+}
+
+function openServiceDescriptionMenu(){
+  const menu = document.getElementById("serviceDescriptionMenu");
+  if(!menu) return;
+
+  syncServiceDescriptionOptionsFromText();
+  closeAllDropdowns();
+  menu.classList.add("is-open");
+}
+
+function closeServiceDescriptionMenu(){
+  const menu = document.getElementById("serviceDescriptionMenu");
+  if(menu) menu.classList.remove("is-open");
+}
+
+function initServiceDescriptionPicker(){
+  const wrapper = document.getElementById("serviceDescriptionWrapper");
+  const description = document.getElementById("serviceDescription");
+  const toggle = document.getElementById("serviceDescriptionToggle");
+  const menu = document.getElementById("serviceDescriptionMenu");
+  const monitors = document.getElementById("serviceOptionMonitors");
+  const floorSockets = document.getElementById("serviceOptionFloorSockets");
+
+  if(!wrapper || !description || !toggle || !menu || !monitors || !floorSockets) return;
+  if(wrapper.dataset.bound === "1") return;
+
+  wrapper.dataset.bound = "1";
+
+  ensureDefaultServiceDescription();
+  syncServiceDescriptionOptionsFromText();
+
+  description.addEventListener("focus", openServiceDescriptionMenu);
+  description.addEventListener("click", function(e){
+    e.stopPropagation();
+    openServiceDescriptionMenu();
+  });
+
+  toggle.addEventListener("click", function(e){
+    e.stopPropagation();
+
+    if(menu.classList.contains("is-open")){
+      closeServiceDescriptionMenu();
+    }else{
+      description.focus();
+      openServiceDescriptionMenu();
+    }
+  });
+
+  menu.addEventListener("click", function(e){
+    e.stopPropagation();
+  });
+
+  monitors.addEventListener("change", updateServiceDescriptionFromOptions);
+  floorSockets.addEventListener("change", updateServiceDescriptionFromOptions);
+}
+
+const SERVICE_WORKER_SHORTCUTS = {
+  SH: "Silvio Hünich",
+  GM: "Giovanni Montesanto",
+  SN: "Sandro Nordhoff",
+  NIL: "Nico Lautenschlager"
+};
+
+function expandServiceWorkerShortcut(field){
+  if(!field) return;
+
+  const shortcut = (field.value || "").trim().toUpperCase();
+  const fullName = SERVICE_WORKER_SHORTCUTS[shortcut];
+
+  if(!fullName) return;
+
+  field.value = fullName;
+  autoGrow(field);
+}
+
 function addServiceWorkRow(name = "", time = ""){
   document.getElementById("serviceWorkRows").insertAdjacentHTML("beforeend", `
     <div class="service-work-row">
@@ -1183,30 +1412,89 @@ function addServiceWorkRow(name = "", time = ""){
     </div>
   `);
 
-  bindAutoGrow(document.getElementById("serviceWorkRows").lastElementChild);
+  const newRow = document.getElementById("serviceWorkRows").lastElementChild;
+  bindAutoGrow(newRow);
+  expandServiceWorkerShortcut(newRow.querySelector(".service-worker-name"));
+}
+
+function addServicePartRow(description = "", count = "", article = ""){
+  const container = document.getElementById("serviceManualPartsRows");
+  if(!container) return;
+
+  container.insertAdjacentHTML("beforeend", `
+    <div class="service-parts-row" data-source="manual">
+      <input class="service-part-description" placeholder="Ersatzteil" value="${escapeHtml(description)}">
+      <input class="service-part-count" placeholder="Anzahl" value="${escapeHtml(String(count))}">
+      <input class="service-part-article" placeholder="Artikelnummer" value="${escapeHtml(article)}">
+      <button class="remove-btn service-remove-btn" onclick="removeServicePartRow(this)">−</button>
+    </div>
+  `);
+}
+
+function removeServicePartRow(button){
+  const row = button?.closest(".service-parts-row");
+  if(row) row.remove();
+}
+
+function ensureServiceManualPartRow(){
+  const container = document.getElementById("serviceManualPartsRows");
+  if(container && container.children.length === 0){
+    addServicePartRow();
+  }
 }
 
 function renderServicePartsRows(parts){
-  const container = document.getElementById("servicePartsRows");
+  const autoContainer = document.getElementById("serviceAutoPartsRows");
   const section = document.getElementById("servicePartsSection");
-  container.innerHTML = "";
+  if(!autoContainer || !section) return;
 
-  if(parts.length === 0){
-    section.classList.add("hidden");
-    return;
-  }
-
+  autoContainer.innerHTML = "";
   section.classList.remove("hidden");
 
-  parts.forEach(part=>{
-    container.insertAdjacentHTML("beforeend", `
-      <div class="service-parts-row">
-        <input value="${escapeHtml(part.description)}" readonly>
-        <input value="${escapeHtml(String(part.count))}" readonly>
-        <input value="${escapeHtml(part.article)}" readonly>
+  (parts || []).forEach(part=>{
+    autoContainer.insertAdjacentHTML("beforeend", `
+      <div class="service-parts-row" data-source="automatic">
+        <input class="service-part-description" value="${escapeHtml(part.description)}" readonly>
+        <input class="service-part-count" value="${escapeHtml(String(part.count))}" readonly>
+        <input class="service-part-article" value="${escapeHtml(part.article)}" readonly>
+        <div class="service-part-auto-spacer"></div>
       </div>
     `);
   });
+
+  ensureServiceManualPartRow();
+}
+
+function renderSavedServicePartsRows(parts){
+  const autoContainer = document.getElementById("serviceAutoPartsRows");
+  const manualContainer = document.getElementById("serviceManualPartsRows");
+  const section = document.getElementById("servicePartsSection");
+  if(!autoContainer || !manualContainer || !section) return;
+
+  autoContainer.innerHTML = "";
+  manualContainer.innerHTML = "";
+  section.classList.remove("hidden");
+
+  (parts || []).forEach(part=>{
+    addServicePartRow(
+      part.description || "",
+      part.count || "",
+      part.article || ""
+    );
+  });
+
+  ensureServiceManualPartRow();
+}
+
+function collectServicePartsFromRenderedRows(){
+  return Array.from(document.querySelectorAll("#servicePartsRows .service-parts-row")).map(row=>{
+    const fields = row.querySelectorAll("input, textarea");
+    return {
+      description: fields[0]?.value?.trim() || "",
+      count: fields[1]?.value?.trim() || "",
+      article: fields[2]?.value?.trim() || ""
+    };
+  }).filter(part => part.description || part.count || part.article);
 }
 
 function getHeaderData(category){
@@ -1371,6 +1659,7 @@ function serializeAnkerForm(){
 
 function serializeServiceForm(){
   const storedHeaderData = getPreferredHeaderData();
+  const renderedParts = collectServicePartsFromRenderedRows();
 
   return {
     headerMetaText: document.getElementById("serviceMetaLine").textContent.trim(),
@@ -1389,7 +1678,7 @@ function serializeServiceForm(){
       name: row.querySelector(".service-worker-name")?.value?.trim() || "",
       time: row.querySelector(".service-worker-time")?.value?.trim() || ""
     })),
-    parts: collectSelectedParts()
+    parts: renderedParts
   };
 }
 
@@ -1495,8 +1784,9 @@ function deserializeServiceForm(data){
   };
 
   document.getElementById("serviceReportNumber").value = data.reportNumber || "";
-  document.getElementById("serviceDescription").value = data.description || "";
+  document.getElementById("serviceDescription").value = data.description || SERVICE_DESCRIPTION_DEFAULT;
   document.getElementById("serviceNextDate").value = data.nextDate || "";
+  syncServiceDescriptionOptionsFromText();
   document.getElementById("serviceReportNumberPreview").textContent = data.reportNumber || "";
 
   document.getElementById("serviceMetaLine").textContent = data.headerMetaText || [
@@ -1511,7 +1801,7 @@ function deserializeServiceForm(data){
   const workRows = data.workRows && data.workRows.length ? data.workRows : [{ name:"", time:"" }];
   workRows.forEach(row=>addServiceWorkRow(row.name, row.time));
 
-  renderServicePartsRows(data.parts || []);
+  renderSavedServicePartsRows(data.parts || []);
   bindAutoGrow();
 }
 
@@ -2173,8 +2463,24 @@ function createPdfOutlinedCell(value){
   return cell;
 }
 
+function createPdfPlainTextCell(value){
+  const cell = document.createElement("div");
+  cell.style.background = "#ffffff";
+  cell.style.border = "none";
+  cell.style.borderRadius = "0";
+  cell.style.padding = "0";
+  cell.style.fontSize = "12px";
+  cell.style.lineHeight = "1.35";
+  cell.style.whiteSpace = "pre-wrap";
+  cell.style.minHeight = "16px";
+  cell.style.textAlign = "left";
+  cell.textContent = value || "";
+  return cell;
+}
+
 function buildServicePdfPageDom({
   headerData,
+  headerMetaText,
   logoDataUrl,
   reportNumber,
   description,
@@ -2210,7 +2516,7 @@ function buildServicePdfPageDom({
   }
 
   if(showHeaderBlock){
-    const subtitleText = formatHeaderSubtitle(headerData || {});
+    const subtitleText = (headerMetaText || "").trim() || formatHeaderSubtitle(headerData || {});
 
     if(subtitleText){
       const subtitle = document.createElement("div");
@@ -2227,9 +2533,11 @@ function buildServicePdfPageDom({
       const logo = document.createElement("img");
       logo.src = logoDataUrl;
       logo.style.display = "block";
-      logo.style.width = "100%";
+      logo.style.width = "calc(100% + 56px)";
       logo.style.height = "48px";
       logo.style.objectFit = "cover";
+      logo.style.marginLeft = "-28px";
+      logo.style.marginRight = "-28px";
       logo.style.marginBottom = "14px";
       top.appendChild(logo);
     }
@@ -2251,16 +2559,18 @@ function buildServicePdfPageDom({
 
   const workerHeader = document.createElement("div");
   workerHeader.style.display = "grid";
-  workerHeader.style.gridTemplateColumns = "2fr 1fr";
+  workerHeader.style.gridTemplateColumns = "2fr 1fr 2fr";
   workerHeader.style.gap = "12px";
   workerHeader.style.fontSize = "14px";
   workerHeader.style.fontWeight = "600";
   workerHeader.style.marginBottom = "12px";
 
   const workerHeaderLeft = document.createElement("div");
+  workerHeaderLeft.style.gridColumn = "1 / span 2";
   workerHeaderLeft.textContent = "Ausführender Mitarbeiter";
 
   const workerHeaderRight = document.createElement("div");
+  workerHeaderRight.style.gridColumn = "3";
   workerHeaderRight.textContent = "Arbeitszeit";
 
   workerHeader.appendChild(workerHeaderLeft);
@@ -2270,12 +2580,16 @@ function buildServicePdfPageDom({
   pageWorkRows.forEach(row=>{
     const rowEl = document.createElement("div");
     rowEl.style.display = "grid";
-    rowEl.style.gridTemplateColumns = "2fr 1fr";
+    rowEl.style.gridTemplateColumns = "2fr 1fr 2fr";
     rowEl.style.gap = "12px";
     rowEl.style.marginBottom = "8px";
+    rowEl.style.alignItems = "start";
 
-    const left = createPdfOutlinedCell(row.name || "");
-    const right = createPdfOutlinedCell(row.time || "");
+    const left = createPdfPlainTextCell(row.name || "");
+    left.style.gridColumn = "1 / span 2";
+
+    const right = createPdfPlainTextCell(row.time || "");
+    right.style.gridColumn = "3";
 
     rowEl.appendChild(left);
     rowEl.appendChild(right);
@@ -2372,6 +2686,7 @@ function fitsServicePage(config){
 }
 
 async function generateServicePDF(){
+  syncServicePage();
   await saveCurrentForm("Servicebericht");
 
   const { jsPDF } = window.jspdf;
@@ -2398,6 +2713,7 @@ async function generateServicePDF(){
     while(workIndex < workRows.length){
       const testConfig = {
         headerData: data.headerData,
+        headerMetaText: data.headerMetaText,
         logoDataUrl,
         reportNumber: data.reportNumber,
         description: firstPage ? data.description : "",
@@ -2421,6 +2737,7 @@ async function generateServicePDF(){
     while(partIndex < parts.length){
       const testConfig = {
         headerData: data.headerData,
+        headerMetaText: data.headerMetaText,
         logoDataUrl,
         reportNumber: data.reportNumber,
         description: firstPage ? data.description : "",
@@ -2455,6 +2772,7 @@ async function generateServicePDF(){
 
     pagesData.push({
       headerData: data.headerData,
+      headerMetaText: data.headerMetaText,
       logoDataUrl,
       reportNumber: data.reportNumber,
       description: firstPage ? data.description : "",
@@ -2475,6 +2793,7 @@ async function generateServicePDF(){
   if(pagesData.length === 0){
     pagesData.push({
       headerData: data.headerData,
+      headerMetaText: data.headerMetaText,
       logoDataUrl,
       reportNumber: data.reportNumber,
       description: data.description,
@@ -2502,7 +2821,7 @@ async function generateServicePDF(){
     document.body.appendChild(pageDom);
 
     const canvas = await html2canvas(pageDom, {
-      scale:2,
+      scale:3,
       useCORS:true,
       backgroundColor:"#ffffff"
     });
@@ -2511,7 +2830,7 @@ async function generateServicePDF(){
 
     const pageWidthMm = 210;
     const pageHeightMm = 297;
-    pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, pageWidthMm, pageHeightMm);
+    pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, pageWidthMm, pageHeightMm);
   }
 
   pdf.save(getPdfFilename("Servicebericht"));
@@ -2539,6 +2858,10 @@ function bindAutoGrow(scope=document){
 /* ------------------------------ Live Sync ------------------------------ */
 
 document.addEventListener("input", function(e){
+  if(e.target.matches(".service-worker-name")){
+    expandServiceWorkerShortcut(e.target);
+  }
+
   if(e.target.id === "serviceReportNumber"){
     document.getElementById("serviceReportNumberPreview").textContent = e.target.value.trim();
   }
@@ -2588,6 +2911,9 @@ function initializeApp(){
   attachVerbogenAutoStatusLogic(document.getElementById("stangenPage"));
 
   addServiceWorkRow();
+  initServiceDescriptionPicker();
+  ensureDefaultServiceDescription();
+  syncServiceDescriptionOptionsFromText();
   syncServicePage();
   bindAutoGrow();
   renderHistory();

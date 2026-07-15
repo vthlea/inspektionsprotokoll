@@ -293,6 +293,11 @@ h2{
 /* Dropdown */
 .ersatz-wrapper{
   position:relative;
+  cursor:pointer;
+}
+
+.ersatz-wrapper .ersatz-field{
+  cursor:pointer;
 }
 
 .dropdown-toggle{
@@ -1173,13 +1178,17 @@ function removeRow(btn){
 function attachDropdownLogic(scopeElement){
   if(!scopeElement) return;
 
-  scopeElement.querySelectorAll(".dropdown-toggle").forEach(toggle=>{
-    if(toggle.dataset.bound === "1") return;
-    toggle.dataset.bound = "1";
+  scopeElement.querySelectorAll(".ersatz-wrapper").forEach(wrapper=>{
+    if(wrapper.dataset.dropdownBound === "1") return;
+    wrapper.dataset.dropdownBound = "1";
 
-    toggle.onclick = function(e){
+    wrapper.addEventListener("click", function(e){
+      if(e.target.closest(".dropdown-menu")) return;
+
       e.stopPropagation();
-      const menu = this.nextElementSibling;
+      const menu = this.querySelector(".dropdown-menu");
+      if(!menu) return;
+
       const isOpen = menu.style.display === "block";
 
       if(!isOpen){
@@ -1188,7 +1197,7 @@ function attachDropdownLogic(scopeElement){
       }else{
         menu.style.display = "none";
       }
-    };
+    });
   });
 
   scopeElement.querySelectorAll(".dropdown-menu").forEach(menu=>{
@@ -2304,6 +2313,74 @@ async function saveCurrentForm(type){
 
 /* ------------------------------ PDF Stangen / Anker ------------------------------ */
 
+async function createInspectionPdfFooterImage(){
+  const footer = document.createElement("div");
+  footer.style.position = "absolute";
+  footer.style.left = "-99999px";
+  footer.style.top = "0";
+  footer.style.width = "1600px";
+  footer.style.background = "#ffffff";
+  footer.style.display = "grid";
+  footer.style.gridTemplateColumns = "1.35fr 1fr 1.15fr";
+  footer.style.gap = "52px";
+  footer.style.alignItems = "start";
+  footer.style.padding = "0";
+  footer.style.margin = "0";
+  footer.style.boxSizing = "border-box";
+  footer.style.fontFamily = "'Poppins', sans-serif";
+  footer.style.fontSize = "14px";
+  footer.style.fontWeight = "400";
+  footer.style.lineHeight = "1.35";
+  footer.style.color = "#111";
+
+  const footerLeft = document.createElement("div");
+  footerLeft.style.whiteSpace = "pre-line";
+  footerLeft.textContent =
+    "S. Bleyer GmbH\n" +
+    "Steinbeisstr. 20 - 73614 Schorndorf\n" +
+    "Geschäftsführer: Stefan Bleyer";
+
+  const footerCenter = document.createElement("div");
+  footerCenter.style.whiteSpace = "pre-line";
+  footerCenter.textContent =
+    "www.s-bleyer-gmbh.de\n" +
+    "info@s-bleyer-gmbh.de\n" +
+    "+49 (0) 7181 / 93270";
+
+  const footerRight = document.createElement("div");
+  footerRight.style.whiteSpace = "pre-line";
+  footerRight.textContent =
+    "Steuer.Nr.: 82120/43532\n" +
+    "Ust-Id-Nr.: DE814464233\n" +
+    "Registergericht Stuttgart HRB 282215";
+
+  footer.appendChild(footerLeft);
+  footer.appendChild(footerCenter);
+  footer.appendChild(footerRight);
+  document.body.appendChild(footer);
+
+  if(document.fonts?.ready){
+    await document.fonts.ready;
+  }
+
+  const rect = footer.getBoundingClientRect();
+  const canvas = await html2canvas(footer, {
+    scale: 4,
+    useCORS: true,
+    backgroundColor: "#ffffff",
+    width: 1600,
+    height: Math.ceil(rect.height)
+  });
+
+  document.body.removeChild(footer);
+
+  return {
+    dataUrl: canvas.toDataURL("image/png"),
+    widthPx: canvas.width,
+    heightPx: canvas.height
+  };
+}
+
 async function generatePDF(category){
   await saveCurrentForm(category);
 
@@ -2328,8 +2405,14 @@ async function generatePDF(category){
 
   document.body.appendChild(clone);
 
-  const pdf = new jsPDF("l", "mm", "a4");
+  const pdf = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: "a4",
+    compress: true
+  });
   const logoDataUrl = await getLogoDataUrl();
+  const footerImg = await createInspectionPdfFooterImage();
   const titleImg = await createPdfTitleImage(
     category === "Anker"
       ? "Inspektionsprotokoll Anker"
@@ -2358,12 +2441,18 @@ async function generatePDF(category){
     ? logoTop + logoHeightFirstPage + 5
     : (subtitleImg ? subtitleTop + subtitleTargetHeightMm + 5 : firstPageTitleTop + titleTargetHeightMm + 5);
 
-  const pageNumberY = pageHeight - 4.5;
+  const pageNumberY = pageHeight - 3.5;
 
   const otherPagesContentTop = 10;
-  const contentBottom = pageHeight - 10;
-
   const contentWidth = pageWidth - (marginLeftRight * 2);
+
+  const footerTargetWidthMm = contentWidth;
+  const footerTargetHeightMm = footerImg
+    ? footerImg.heightPx * footerTargetWidthMm / footerImg.widthPx
+    : 0;
+  const footerBottom = pageHeight - 7;
+  const footerTop = footerBottom - footerTargetHeightMm;
+  const contentBottom = footerImg ? footerTop - 6 : pageHeight - 10;
 
   let currentY = firstPageContentTop;
   let isFirstPdfPage = true;
@@ -2374,7 +2463,7 @@ async function generatePDF(category){
     const section = sections[index];
 
     const canvas = await html2canvas(section, {
-      scale: 2,
+      scale: 3,
       useCORS: true,
       backgroundColor: "#ffffff",
       windowWidth: 1600,
@@ -2398,12 +2487,14 @@ async function generatePDF(category){
       }
 
       pdf.addImage(
-        canvas.toDataURL("image/jpeg", 0.95),
-        "JPEG",
+        canvas.toDataURL("image/png"),
+        "PNG",
         marginLeftRight,
         currentY,
         imgWidthMm,
-        imgHeightMm
+        imgHeightMm,
+        undefined,
+        "FAST"
       );
 
       currentY += imgHeightMm + 5;
@@ -2442,12 +2533,14 @@ async function generatePDF(category){
       const sliceHeightMm = currentSlicePx / pxPerMm;
 
       pdf.addImage(
-        sliceCanvas.toDataURL("image/jpeg", 0.95),
-        "JPEG",
+        sliceCanvas.toDataURL("image/png"),
+        "PNG",
         marginLeftRight,
         currentY,
         imgWidthMm,
-        sliceHeightMm
+        sliceHeightMm,
+        undefined,
+        "FAST"
       );
 
       remainingPx -= currentSlicePx;
@@ -2513,6 +2606,19 @@ async function generatePDF(category){
         logoTop,
         pageWidth,
         logoHeightFirstPage
+      );
+    }
+
+    if(footerImg){
+      pdf.addImage(
+        footerImg.dataUrl,
+        "PNG",
+        marginLeftRight,
+        footerTop,
+        footerTargetWidthMm,
+        footerTargetHeightMm,
+        undefined,
+        "FAST"
       );
     }
 

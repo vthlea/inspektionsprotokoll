@@ -391,10 +391,22 @@ h2{
 
 .service-work-row{
   display:grid;
-  grid-template-columns:2fr 1fr 44px;
+  grid-template-columns:2fr 1fr 2fr 44px;
   gap:12px;
   align-items:start;
   margin-bottom:8px;
+}
+
+.service-work-row .service-worker-name{
+  grid-column:1 / span 2;
+}
+
+.service-work-row .service-worker-time{
+  grid-column:3;
+}
+
+.service-work-row .service-remove-btn{
+  grid-column:4;
 }
 
 .service-parts-row{
@@ -513,7 +525,7 @@ h2{
   </div>
 
   <div class="history-panel">
-    <h2 class="history-title">Historie</h2>
+    <h2 class="history-title">Zwischenablage</h2>
     <div class="history-search">
       <input id="historySearchInput" placeholder="Suche nach Kunde, Standort, Jahr, Typ oder Dateiname">
     </div>
@@ -539,7 +551,7 @@ h2{
   <div id="stangenTables"></div>
 
   <div class="page-actions">
-    <button class="save-btn" onclick="saveCurrentForm('Stangen')">In Historie speichern</button>
+    <button class="save-btn" onclick="saveCurrentForm('Stangen')">In Zwischenablage speichern</button>
     <button class="add-btn" onclick="generatePDF('Stangen')">PDF erstellen</button>
   </div>
 </div>
@@ -562,7 +574,7 @@ h2{
   <div id="ankerTables"></div>
 
   <div class="page-actions">
-    <button class="save-btn" onclick="saveCurrentForm('Anker')">In Historie speichern</button>
+    <button class="save-btn" onclick="saveCurrentForm('Anker')">In Zwischenablage speichern</button>
     <button class="add-btn" onclick="generatePDF('Anker')">PDF erstellen</button>
   </div>
 </div>
@@ -605,10 +617,10 @@ h2{
       </div>
 
       <div class="service-card">
-        <div class="service-card-header two" style="display:grid;grid-template-columns:2fr 1fr 44px;gap:12px;font-size:14px;font-weight:600;align-items:center;margin-bottom:12px;">
-          <div>Ausführender Mitarbeiter</div>
-          <div>Arbeitszeit</div>
-          <div></div>
+        <div class="service-card-header two" style="display:grid;grid-template-columns:2fr 1fr 2fr 44px;gap:12px;font-size:14px;font-weight:600;align-items:center;margin-bottom:12px;">
+          <div style="grid-column:1 / span 2;">Ausführender Mitarbeiter</div>
+          <div style="grid-column:3;">Arbeitszeit</div>
+          <div style="grid-column:4;"></div>
         </div>
       </div>
 
@@ -636,7 +648,7 @@ h2{
   </div>
 
   <div class="page-actions" style="max-width:900px; margin-left:auto; margin-right:auto;">
-    <button class="save-btn" onclick="saveCurrentForm('Servicebericht')">In Historie speichern</button>
+    <button class="save-btn" onclick="saveCurrentForm('Servicebericht')">In Zwischenablage speichern</button>
     <button class="add-btn" onclick="generateServicePDF()">PDF erstellen</button>
   </div>
 </div>
@@ -941,12 +953,21 @@ const STANGEN_ERSATZTEILE_BY_TABLE = {
     { description: "Kugelsperrbolzen", article: "SBHF17-20", value: "20" }
   ],
   qstTable: [
-    { description: "Ersatzteil", article: "1", value: "1" },
-    { description: "Ersatzteil", article: "2", value: "2" }
+    { description: "Bronzebuchsen", article: "SBHF17-24", value: "24" },
+    { description: "Hebel für Hakenschließstift", article: "SBHF17-30", value: "30" },
+    { description: "Hakenschließstift", article: "SBHF17-33", value: "33" },
+    { description: "Hakengrundkörper", article: "SBHF17-34", value: "34" },
+    { description: "Hakenschließer QST03", article: "SBHF17-35", value: "35" },
+    { description: "Rohrendkappe", article: "SBHF17-38", value: "38" }
   ],
   zstTable: [
-    { description: "Ersatzteil", article: "1", value: "1" },
-    { description: "Ersatzteil", article: "2", value: "2" }
+    { description: "Bronzebuchsen", article: "SBHF17-24", value: "24" },
+    { description: "Hebel für Hakenschließstift", article: "SBHF17-30", value: "30" },
+    { description: "Hakenschließstift", article: "SBHF17-33", value: "33" },
+    { description: "Hakengrundkörper", article: "SBHF17-34", value: "34" },
+    { description: "Fixierungslager am Haken mit Lasche", article: "SBHF17-36", value: "36" },
+    { description: "Hakenschließer ZST03", article: "SBHF17-37", value: "37" },
+    { description: "Rohrendkappe", article: "SBHF17-38", value: "38" }
   ]
 };
 
@@ -1264,7 +1285,7 @@ function attachVerbogenAutoStatusLogic(scopeElement){
         return;
       }
 
-      if(val <= -11){
+      if(Math.abs(val) >= 11){
         dot.classList.remove("is-orange");
         dot.classList.add("is-red");
       }else{
@@ -1388,7 +1409,29 @@ const SERVICE_WORKER_SHORTCUTS = {
   SH: "Silvio Hünich",
   GM: "Giovanni Montesanto",
   SN: "Sandro Nordhoff",
-  NIL: "Nico Lautenschlager"
+  NIL: "Nico Lautenschlager",
+  NR: "Natalie Rieger",
+  LV: "Lea Voith",
+  GH: "Gabi Hoyler",
+  CC: "Claudio Carullo",
+  ZAB: "Zizou Al-Badl",
+  HEB: "Heidi Bleyer",
+  LE: "Lars Ebert",
+  FF: "Fabian Fichtler",
+  AF: "Armin Fischer",
+  HPG: "Hans-Peter Geist",
+  TH: "Thorsten Hennek",
+  TK: "Thomas Kallenborn",
+  DK: "Dennis Kübler",
+  NL: "Niko Lederer",
+  PM: "Patrick Maier",
+  MM: "Moritz Müller",
+  JP: "Jannik Pfaue",
+  JR: "Jakob Rommel",
+  JÖS: "Jörg Schröder",
+  AW: "Adrian Wahl",
+  ROW: "Robin Walker",
+  TW: "Tim Wolff"
 };
 
 function expandServiceWorkerShortcut(field){
@@ -1431,9 +1474,24 @@ function addServicePartRow(description = "", count = "", article = ""){
   `);
 }
 
+function addAutomaticServicePartRow(description = "", count = "", article = ""){
+  const container = document.getElementById("serviceAutoPartsRows");
+  if(!container) return;
+
+  container.insertAdjacentHTML("beforeend", `
+    <div class="service-parts-row" data-source="automatic">
+      <input class="service-part-description" value="${escapeHtml(description)}" readonly>
+      <input class="service-part-count" value="${escapeHtml(String(count))}" readonly>
+      <input class="service-part-article" value="${escapeHtml(article)}" readonly>
+      <div class="service-part-auto-spacer"></div>
+    </div>
+  `);
+}
+
 function removeServicePartRow(button){
   const row = button?.closest(".service-parts-row");
-  if(row) row.remove();
+  if(!row || row.dataset.source !== "manual") return;
+  row.remove();
 }
 
 function ensureServiceManualPartRow(){
@@ -1452,14 +1510,11 @@ function renderServicePartsRows(parts){
   section.classList.remove("hidden");
 
   (parts || []).forEach(part=>{
-    autoContainer.insertAdjacentHTML("beforeend", `
-      <div class="service-parts-row" data-source="automatic">
-        <input class="service-part-description" value="${escapeHtml(part.description)}" readonly>
-        <input class="service-part-count" value="${escapeHtml(String(part.count))}" readonly>
-        <input class="service-part-article" value="${escapeHtml(part.article)}" readonly>
-        <div class="service-part-auto-spacer"></div>
-      </div>
-    `);
+    addAutomaticServicePartRow(
+      part.description || "",
+      part.count || "",
+      part.article || ""
+    );
   });
 
   ensureServiceManualPartRow();
@@ -1475,12 +1530,33 @@ function renderSavedServicePartsRows(parts){
   manualContainer.innerHTML = "";
   section.classList.remove("hidden");
 
+  const currentlySelectedParts = collectSelectedParts();
+  const selectedKeys = new Set(
+    currentlySelectedParts.map(part =>
+      `${part.description || ""}||${part.article || ""}||${String(part.count || "")}`
+    )
+  );
+
   (parts || []).forEach(part=>{
-    addServicePartRow(
-      part.description || "",
-      part.count || "",
-      part.article || ""
-    );
+    const key = `${part.description || ""}||${part.article || ""}||${String(part.count || "")}`;
+    const source = part.source === "automatic" ||
+      (!part.source && selectedKeys.has(key))
+        ? "automatic"
+        : "manual";
+
+    if(source === "automatic"){
+      addAutomaticServicePartRow(
+        part.description || "",
+        part.count || "",
+        part.article || ""
+      );
+    }else{
+      addServicePartRow(
+        part.description || "",
+        part.count || "",
+        part.article || ""
+      );
+    }
   });
 
   ensureServiceManualPartRow();
@@ -1492,7 +1568,8 @@ function collectServicePartsFromRenderedRows(){
     return {
       description: fields[0]?.value?.trim() || "",
       count: fields[1]?.value?.trim() || "",
-      article: fields[2]?.value?.trim() || ""
+      article: fields[2]?.value?.trim() || "",
+      source: row.dataset.source === "automatic" ? "automatic" : "manual"
     };
   }).filter(part => part.description || part.count || part.article);
 }
@@ -2082,7 +2159,7 @@ async function importExchangeFile(input){
   }
 }
 
-/* ------------------------------ Historie ------------------------------ */
+/* ------------------------------ Zwischenablage ------------------------------ */
 
 function sortHistory(records){
   return records.sort((a,b)=>{
@@ -2487,6 +2564,7 @@ function buildServicePdfPageDom({
   pageWorkRows,
   includePartsHeader,
   pagePartsRows,
+  includeEmptyPartsNotice = false,
   nextDate,
   includeBottomBlock,
   showHeaderBlock,
@@ -2496,7 +2574,7 @@ function buildServicePdfPageDom({
   page.style.width = "794px";
   page.style.minHeight = "1123px";
   page.style.background = "#ffffff";
-  page.style.padding = "28px";
+  page.style.padding = "40px";
   page.style.boxSizing = "border-box";
   page.style.display = "flex";
   page.style.flexDirection = "column";
@@ -2533,11 +2611,11 @@ function buildServicePdfPageDom({
       const logo = document.createElement("img");
       logo.src = logoDataUrl;
       logo.style.display = "block";
-      logo.style.width = "calc(100% + 56px)";
+      logo.style.width = "calc(100% + 80px)";
       logo.style.height = "48px";
       logo.style.objectFit = "cover";
-      logo.style.marginLeft = "-28px";
-      logo.style.marginRight = "-28px";
+      logo.style.marginLeft = "-40px";
+      logo.style.marginRight = "-40px";
       logo.style.marginBottom = "14px";
       top.appendChild(logo);
     }
@@ -2557,44 +2635,50 @@ function buildServicePdfPageDom({
     top.appendChild(desc);
   }
 
-  const workerHeader = document.createElement("div");
-  workerHeader.style.display = "grid";
-  workerHeader.style.gridTemplateColumns = "2fr 1fr 2fr";
-  workerHeader.style.gap = "12px";
-  workerHeader.style.fontSize = "14px";
-  workerHeader.style.fontWeight = "600";
-  workerHeader.style.marginBottom = "12px";
+  // Mitarbeiter und Arbeitszeit nur anzeigen, wenn es sich um die erste Seite
+  // handelt oder auf der Seite tatsächlich noch Mitarbeiterzeilen vorhanden sind.
+  // Dadurch wird die Überschrift auf reinen Ersatzteil-Folgeseiten nicht wiederholt.
+  if(showHeaderBlock || pageWorkRows.length > 0){
+    const workerHeader = document.createElement("div");
+    workerHeader.style.display = "grid";
+    workerHeader.style.gridTemplateColumns = "2fr 1fr 2fr";
+    workerHeader.style.gap = "12px";
+    workerHeader.style.fontSize = "14px";
+    workerHeader.style.fontWeight = "600";
+    workerHeader.style.marginBottom = "12px";
 
-  const workerHeaderLeft = document.createElement("div");
-  workerHeaderLeft.style.gridColumn = "1 / span 2";
-  workerHeaderLeft.textContent = "Ausführender Mitarbeiter";
+    const workerHeaderLeft = document.createElement("div");
+    workerHeaderLeft.style.gridColumn = "1 / span 2";
+    workerHeaderLeft.textContent = "Ausführender Mitarbeiter";
 
-  const workerHeaderRight = document.createElement("div");
-  workerHeaderRight.style.gridColumn = "3";
-  workerHeaderRight.textContent = "Arbeitszeit";
+    const workerHeaderRight = document.createElement("div");
+    workerHeaderRight.style.gridColumn = "3";
+    workerHeaderRight.textContent = "Arbeitszeit";
 
-  workerHeader.appendChild(workerHeaderLeft);
-  workerHeader.appendChild(workerHeaderRight);
-  top.appendChild(workerHeader);
+    workerHeader.appendChild(workerHeaderLeft);
+    workerHeader.appendChild(workerHeaderRight);
+    top.appendChild(workerHeader);
 
-  pageWorkRows.forEach(row=>{
-    const rowEl = document.createElement("div");
-    rowEl.style.display = "grid";
-    rowEl.style.gridTemplateColumns = "2fr 1fr 2fr";
-    rowEl.style.gap = "12px";
-    rowEl.style.marginBottom = "8px";
-    rowEl.style.alignItems = "start";
+    pageWorkRows.forEach(row=>{
+      const rowEl = document.createElement("div");
+      rowEl.style.display = "grid";
+      rowEl.style.gridTemplateColumns = "2fr 1fr 2fr";
+      rowEl.style.gap = "12px";
+      rowEl.style.marginBottom = "8px";
+      rowEl.style.alignItems = "start";
 
-    const left = createPdfPlainTextCell(row.name || "");
-    left.style.gridColumn = "1 / span 2";
+      const left = createPdfPlainTextCell(row.name || "");
+      left.style.gridColumn = "1 / span 2";
+      left.style.fontSize = "14px";
 
-    const right = createPdfPlainTextCell(row.time || "");
-    right.style.gridColumn = "3";
+      const right = createPdfPlainTextCell(row.time || "");
+      right.style.gridColumn = "3";
 
-    rowEl.appendChild(left);
-    rowEl.appendChild(right);
-    top.appendChild(rowEl);
-  });
+      rowEl.appendChild(left);
+      rowEl.appendChild(right);
+      top.appendChild(rowEl);
+    });
+  }
 
   if(includePartsHeader && pagePartsRows.length > 0){
     const partsHeader = document.createElement("div");
@@ -2627,6 +2711,22 @@ function buildServicePdfPageDom({
 
     top.appendChild(rowEl);
   });
+
+  if(includeEmptyPartsNotice){
+    const emptyPartsHeading = document.createElement("div");
+    emptyPartsHeading.style.fontSize = "14px";
+    emptyPartsHeading.style.fontWeight = "600";
+    emptyPartsHeading.style.margin = "28px 0 10px 0";
+    emptyPartsHeading.textContent = "Ersatzteile";
+    top.appendChild(emptyPartsHeading);
+
+    const emptyPartsText = document.createElement("div");
+    emptyPartsText.style.fontSize = "14px";
+    emptyPartsText.style.lineHeight = "1.35";
+    emptyPartsText.style.marginBottom = "8px";
+    emptyPartsText.textContent = "Es wurden keine Ersatzteile verbaut.";
+    top.appendChild(emptyPartsText);
+  }
 
   page.appendChild(top);
 
@@ -2663,6 +2763,45 @@ function buildServicePdfPageDom({
 
     page.appendChild(bottom);
   }
+
+  const footer = document.createElement("div");
+  footer.style.display = "grid";
+  footer.style.gridTemplateColumns = "1.35fr 1fr 1.15fr";
+  footer.style.gap = "34px";
+  footer.style.alignItems = "start";
+  footer.style.marginTop = "30px";
+  footer.style.padding = "18px 0 0 0";
+  footer.style.boxSizing = "border-box";
+  footer.style.fontSize = "9px";
+  footer.style.fontWeight = "400";
+  footer.style.lineHeight = "1.35";
+  footer.style.color = "#111";
+
+  const footerLeft = document.createElement("div");
+  footerLeft.style.whiteSpace = "pre-line";
+  footerLeft.textContent =
+    "S. Bleyer GmbH\n" +
+    "Steinbeisstr. 20 - 73614 Schorndorf\n" +
+    "Geschäftsführer: Stefan Bleyer";
+
+  const footerCenter = document.createElement("div");
+  footerCenter.style.whiteSpace = "pre-line";
+  footerCenter.textContent =
+    "www.s-bleyer-gmbh.de\n" +
+    "info@s-bleyer-gmbh.de\n" +
+    "+49 (0) 7181 / 93270";
+
+  const footerRight = document.createElement("div");
+  footerRight.style.whiteSpace = "pre-line";
+  footerRight.textContent =
+    "Steuer.Nr.: 82120/43532\n" +
+    "Ust-Id-Nr.: DE814464233\n" +
+    "Registergericht Stuttgart HRB 282215";
+
+  footer.appendChild(footerLeft);
+  footer.appendChild(footerCenter);
+  footer.appendChild(footerRight);
+  page.appendChild(footer);
 
   return page;
 }
@@ -2720,6 +2859,7 @@ async function generateServicePDF(){
         pageWorkRows: [...pageWorkRows, workRows[workIndex]],
         includePartsHeader: false,
         pagePartsRows,
+        includeEmptyPartsNotice: false,
         nextDate: data.nextDate,
         includeBottomBlock: false,
         showHeaderBlock: firstPage,
@@ -2744,6 +2884,7 @@ async function generateServicePDF(){
         pageWorkRows,
         includePartsHeader: true,
         pagePartsRows: [...pagePartsRows, parts[partIndex]],
+        includeEmptyPartsNotice: false,
         nextDate: data.nextDate,
         includeBottomBlock: false,
         showHeaderBlock: firstPage,
@@ -2779,6 +2920,7 @@ async function generateServicePDF(){
       pageWorkRows,
       includePartsHeader: pagePartsRows.length > 0,
       pagePartsRows,
+      includeEmptyPartsNotice: false,
       nextDate: data.nextDate,
       includeBottomBlock: false,
       showHeaderBlock: firstPage,
@@ -2800,18 +2942,25 @@ async function generateServicePDF(){
       pageWorkRows: [],
       includePartsHeader: false,
       pagePartsRows: [],
+      includeEmptyPartsNotice: true,
       nextDate: data.nextDate,
       includeBottomBlock: true,
       showHeaderBlock: true,
       showReportTitle: true
     });
   }else{
-    pagesData[pagesData.length - 1].includeBottomBlock = true;
+    const lastPage = pagesData[pagesData.length - 1];
+    lastPage.includeBottomBlock = true;
+
+    if(parts.length === 0){
+      lastPage.includeEmptyPartsNotice = true;
+    }
   }
 
   const pdf = new jsPDF("p", "mm", "a4");
+  const pageCount = pagesData.length;
 
-  for(let i=0;i<pagesData.length;i++){
+  for(let i=0;i<pageCount;i++){
     if(i > 0) pdf.addPage();
 
     const pageDom = buildServicePdfPageDom(pagesData[i]);
@@ -2831,6 +2980,18 @@ async function generateServicePDF(){
     const pageWidthMm = 210;
     const pageHeightMm = 297;
     pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, pageWidthMm, pageHeightMm);
+
+    if(pageCount > 1){
+      pdf.setTextColor(156, 163, 175);
+      pdf.setFontSize(7);
+      pdf.text(
+        `Seite ${i + 1} von ${pageCount}`,
+        pageWidthMm - 7,
+        pageHeightMm - 4,
+        { align:"right" }
+      );
+      pdf.setTextColor(17, 17, 17);
+    }
   }
 
   pdf.save(getPdfFilename("Servicebericht"));
